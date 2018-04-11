@@ -1,0 +1,23 @@
+FBI Didn’t Analyze DNC Servers Before Issuing Hacking Report
+
+Posted at 8:39 pm on January 4, 2017 by Jennifer Van Laar
+
+Buzzfeed is reporting that, six months after the agency’s investigation began, the FBI has never requested access to or investigated the Democratic National Committee’s hacked servers. In addition, “no US government entity has run an independent forensic analysis of the system,” according to a source within the intelligence community.
+
+Eric Walker, deputy communications director for the DNC, said in an email to Buzzfeed:
+
+“The DNC had several meetings with representatives of the FBI’s Cyber Division and its Washington (DC) Field Office, the Department of Justice’s National Security Division, and U.S. Attorney’s Offices, and it responded to a variety of requests for cooperation, but the FBI never requested access to the DNC’s computer servers.
+
+Beginning at the time the intrusion was discovered by the DNC, the DNC cooperated fully with the FBI and its investigation, providing access to all of the information uncovered by CrowdStrike – without any limits.”
+
+The source said the FBI relied on Crowdstrike’s analysis, which concluded that Russia-linked hackers were behind the attack, and that the FBI had “no reason to believe that anything that they have concluded is not accurate.”
+
+The FBI did not comment.
+
+Is it standard procedure for the FBI to rely on an independent analysis?
+
+BuzzFeed News spoke to three cybersecurity companies who have worked on major breaches in the last 15 months, who said that it was “par for the course” for the FBI to do their own forensic research into the hacks. None wanted to comment on the record on another cybersecurity company’s work, or the work being done by a national security agency.
+
+Regardless of the quality of Crowdstrike’s work, when reports are being generated concluding that a foreign government hacked into the servers of US political entities with the intent of disrupting the democratic process, our own technology assets – which one would think have more sophisticated tools than private industry – should be the ones doing the analysis.
+
+This is an extremely serious national security matter (which should go without saying), and should be treated as such. If there is an credible explanation as to why the FBI wouldn’t have done have done their own analysis, they should make it known.
