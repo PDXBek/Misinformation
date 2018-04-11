@@ -1,0 +1,103 @@
+---
+output: rmarkdown::github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, warning = FALSE, echo = FALSE,
+  dev="png", fig.retina = 2, fig.width = 10, fig.height = 6
+)
+```
+
+# Misinformation
+
+Word lists and R code for analyzing media reporting that were used in @PDXBek's [Information Anarchy: A Survival Guide for the Misinformation Age](https://www.sans.org/event/cyber-threat-intelligence-summit-2018/summit-agenda) talk at the 2018 SANS Cyber Threat Intelligence Summit.
+
+## What's Inside The Tin
+
+    ├── 00-prep.R                              docx to txt conversion via pandoc
+    ├── 01-eda.R                               initial exploratory data analysis
+    ├── 02-explanatory.R                       analysis of 'explanatory' words
+    ├── 03-retractors.R                        analysis of 'retractor' words
+    ├── 04-sourcing.R                          analysis of 'sourcing' words
+    ├── 05-uncertainty.R                       analysis of 'uncertainty' words
+    ├── 06-overall-normalized-comparison.R     normalized cross-sentiment comparison
+    ├── lists                                  "sentiment" word lists for the analyses
+    └── source-docs                            source documents for the analysis
+
+Each R source file can be run like a normal script, but have specially formatted comments that make it possible to "knit/spin" them into self-contained HTML reports via [RStudio](https://www.rstudio.com/). RStudio users can open up the included  `misinformation.Rproj` project to get started.
+
+The "sentiment" n-gram lists used are in the `lists` directory and the source news documents are in `source-docs`. There is no need to run the prep script as the `docx` files have already been converted to plaintext.
+
+While each list can be analyzed independently, a normalized heatmap view can be created with the `06-overall-normalized-comparison.R` script (the output of which is below).
+
+```{r echo=FALSE}
+library(stringi)
+library(ggalt)
+library(knitr)
+library(viridis)
+library(tidytext) # devtools::install_github("juliasilge/tidytext")
+library(hrbrthemes)
+library(tidyverse)
+
+list.files("source-docs", pattern=".*txt$", full.names=TRUE) %>%
+  map_df(~{
+    data_frame(
+      doc = tools::file_path_sans_ext(tools::file_path_sans_ext(basename(.x))),
+      text = read_lines(.x) %>% paste0(collapse=" ") %>% stri_trans_tolower()
+    )
+  }) %>%
+  mutate(text = stri_replace_all_regex(text, "[[:punct:]]", "")) %>%
+  mutate(doc_id = substr(doc, 1, 30)) -> corpus
+
+# Get rid of words with numbers
+unnest_tokens(corpus, word, text) %>%
+  filter(!stri_detect_regex(word, "[[:digit:]]")) -> one_grams
+
+count(one_grams, doc_id) %>%
+  rename(total_words = n) -> total_words
+
+list(
+  explanatory = read_lines("lists/explanatory.csv"),
+  retractors = read_lines("lists/retractors.csv"),
+  sourcing = read_lines("lists/sourcing.csv"),
+  uncertainty = read_lines("lists/uncertainty.csv")
+) -> word_lists
+
+map_df(names(word_lists), ~{
+
+  map_df(word_lists[[.x]], ~{
+    group_by(corpus, doc_id) %>%
+      summarise(keyword = .x, ct = stri_count_regex(text, sprintf("\\W%s\\W", .x)))
+  }) %>%
+    mutate(doc_num = as.character(as.numeric(factor(doc_id)))) %>%
+    mutate(ct = ifelse(ct == 0, NA, ct)) %>%
+    count(doc_id, wt=ct) %>%
+    mutate(doc_num = as.character(as.numeric(factor(doc_id)))) %>%
+    left_join(total_words) %>%
+    mutate(pct = n/total_words) %>%
+    mutate(list = .x)
+}) -> overall
+```
+
+```{r overall_heatmap}
+ggplot(overall, aes(doc_num, list, fill=pct)) +
+  geom_tile(color="#2b2b2b", size=0.125) +
+  scale_x_discrete(expand=c(0,0)) +
+  scale_y_discrete(expand=c(0,0)) +
+  viridis::scale_fill_viridis(direction=-1, na.value="white") +
+  labs(x=NULL, y=NULL, title="Word List Usage Heatmap (normalized)") +
+  theme_ipsum_rc(grid="")
+```
+
+<div style="margin:auto; width:75%">
+
+ID to Document Name Mapping
+```{r}
+distinct(overall, doc_id, doc_num) %>%
+  left_join(total_words) %>%
+  mutate(total_words = scales::comma(total_words)) %>% 
+  kable(format = "markdown", align = "lrr")
+```
+
+</div>
